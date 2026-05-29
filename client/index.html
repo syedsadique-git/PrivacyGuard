@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PrivacyGuard - Your Privacy Command Center</title>
+    <meta name="description" content="PrivacyGuard is a centralized privacy dashboard that detects trackers, monitors data breaches, and protects your digital privacy." />
+    <meta name="theme-color" content="#050C14" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="PrivacyGuard - Your Privacy Command Center" />
+    <meta property="og:description" content="See every tracker, stop every breach. The only centralized privacy dashboard you need." />
+    <meta property="og:type" content="website" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- GitHub Pages SPA redirect handler -->
+    <script>
+      // Handle redirect from 404.html for SPA routing on GitHub Pages
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
