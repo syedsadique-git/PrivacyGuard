@@ -1,0 +1,318 @@
+# AI Agent Prompt: Build PrivacyGuard Website
+
+## Role & Mission
+
+You are a senior full-stack engineer and UI/UX designer. Your task is to build **PrivacyGuard** — a centralized privacy dashboard web app that scans user online activities to identify trackers, cookies, and privacy leaks. This is a production-grade MVP, not a prototype.
+
+---
+
+## Product Overview
+
+**PrivacyGuard** fills a gap in the privacy tools market: most tracker blockers (Privacy Badger, Ghostery) are browser extensions without a centralized dashboard. PrivacyGuard gives users a web-based command center for their entire digital privacy posture.
+
+**Core Value Proposition:** One place to see, understand, and act on every tracker, cookie, and data breach tied to a user's browsing.
+
+---
+
+## Tech Stack (Strict)
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 18 + Vite, Tailwind CSS, Recharts for data viz |
+| Backend | Node.js + Express.js |
+| Database | PostgreSQL (via Prisma ORM) |
+| Browser Extension | Vanilla JavaScript (Manifest V3) |
+| Auth | JWT + bcrypt |
+| Tracker Rules | EasyList / EasyPrivacy filter lists (fetched & parsed) |
+| Breach Detection | HaveIBeenPwned API (or mock for MVP) |
+
+---
+
+## Visual Design Direction
+
+**Aesthetic:** Dark-mode cyber-security dashboard. Think: deep navy and black backgrounds, electric teal/cyan as the primary accent, subtle grid patterns, monospaced fonts for data readouts, sharp geometric UI elements. Inspired by network monitoring tools — functional, data-dense, but visually dramatic.
+
+**Key Design Rules:**
+- Dark backgrounds only (`#050C14`, `#0A1628` range)
+- Accent colors: electric teal `#00E5CC`, alert red `#FF4D4D`, safe green `#00C853`
+- Typography: `JetBrains Mono` for data/numbers, `Sora` for headings and body copy
+- Cards with subtle glowing borders on hover
+- Animated score rings, pulsing threat indicators
+- No generic purple gradients. No white backgrounds. No Inter font.
+
+---
+
+## Pages & Features to Build
+
+### 1. Landing Page (`/`)
+
+**Purpose:** Convert visitors. Explain the product clearly, build trust.
+
+**Sections:**
+- Hero: Bold headline ("Your Privacy Has Been Compromised. We Prove It."), animated privacy score ring set to 0 that counts up on load, CTA buttons (Start Free Scan / Install Extension)
+- Live Threat Ticker: Scrolling marquee of anonymized, real-time-style tracker detections (can be mock data for MVP)
+- Feature Cards: Tracker Analyzer, Privacy Score, Breach Alerts, One-Click Blocking, Browser Extension
+- Competitor Comparison Table: PrivacyGuard vs Ghostery vs Privacy Badger (highlight PrivacyGuard's dashboard advantage)
+- Pricing Section: Free tier vs Premium tier (freemium model)
+- Footer with links
+
+**Interactions:** Scroll-triggered reveal animations on all sections. Hero score ring animates on load.
+
+---
+
+### 2. Authentication Pages (`/login`, `/signup`)
+
+**Fields:**
+- Signup: Email, Password, Confirm Password
+- Login: Email, Password, "Forgot Password" link
+
+**UX:** Inline validation, loading states on submit, error messages. After signup → redirect to onboarding.
+
+---
+
+### 3. Onboarding Flow (`/onboarding`)
+
+**Steps (multi-step wizard):**
+1. Welcome screen — explain what PrivacyGuard does
+2. Connect browser extension (show install button + instructions for Chrome/Firefox)
+3. Enter email(s) to check for data breaches
+4. Set blocking preferences (block all trackers / ask me / allow all)
+5. Done → redirect to dashboard
+
+**UX:** Step progress bar, skip option, animated transitions between steps.
+
+---
+
+### 4. Main Dashboard (`/dashboard`)
+
+**This is the core screen. Build it to be data-rich and visually impressive.**
+
+**Layout:**
+- Top bar: PrivacyGuard logo, nav links, user avatar, notification bell
+- Left sidebar: Navigation (Dashboard, Trackers, Breaches, Reports, Settings)
+- Main area: Grid of widgets
+
+**Widgets:**
+- **Privacy Score Ring** (large, center-top): Animated circular gauge, 0–100, color changes red→yellow→green. Score calculated from tracker count, breach status, blocking status.
+- **Trackers Detected Today**: Number + sparkline chart, breakdown by category (Analytics, Advertising, Social, Fingerprinting)
+- **Top Trackers Table**: Columns — Tracker Name, Domain, Category, Times Seen, Status (Blocked/Allowed), Action button
+- **Breach Alert Banner**: If email found in breaches — red warning card with breach name, date, exposed data types, and action link
+- **Privacy Tips Feed**: 3 rotating privacy tips articles (can be static content for MVP)
+- **Blocking Toggle**: Global on/off switch for tracker blocking, with current status indicator
+- **Recent Activity Log**: Timeline of last 20 tracker events with timestamp, domain, tracker name
+
+---
+
+### 5. Trackers Detail Page (`/trackers`)
+
+**Full list view of all detected trackers.**
+
+- Search + filter bar (by category, domain, blocked/allowed status, date range)
+- Table: Tracker Name | Domain | Category | First Seen | Last Seen | Count | Risk Level | Block Toggle
+- Click a tracker row → side panel opens with full details (what data it collects, who owns it, privacy risk explanation)
+- Bulk actions: Block All Selected, Allow All Selected
+
+---
+
+### 6. Data Breaches Page (`/breaches`)
+
+- Input field to check an email address against HaveIBeenPwned API
+- Results card: If breached — list of incidents with name, date, exposed fields (passwords, emails, phone numbers, etc.)
+- If clean — green "All Clear" card
+- "Monitor this email" toggle for ongoing alerts (premium feature — show paywall if free tier)
+
+---
+
+### 7. Reports Page (`/reports`) — Premium
+
+- Monthly privacy report with charts: trackers over time (line chart), tracker category breakdown (pie/donut chart), privacy score history
+- Export as PDF button
+- If free tier → blur the content + upgrade prompt overlay
+
+---
+
+### 8. Settings Page (`/settings`)
+
+- Profile: Update email, password
+- Notification preferences: Email alerts for new breaches, weekly summary
+- Blocking rules: Whitelist/blacklist specific domains
+- Extension status: Connected / Not Connected, re-link button
+- Subscription: Current plan, upgrade button, billing info (mock)
+- Danger zone: Delete account
+
+---
+
+## Backend API Endpoints to Build
+
+```
+POST   /api/auth/signup
+POST   /api/auth/login
+GET    /api/auth/me
+
+GET    /api/trackers            — list all trackers for user
+POST   /api/trackers/scan       — trigger a scan (uses EasyList rules)
+PATCH  /api/trackers/:id/block  — toggle block status
+
+GET    /api/breaches?email=...  — check HaveIBeenPwned
+GET    /api/breaches/monitored  — list monitored emails
+POST   /api/breaches/monitor    — add email to monitoring
+
+GET    /api/dashboard/summary   — returns privacy score, tracker count, breach status
+GET    /api/reports/monthly     — monthly stats (premium check)
+
+GET    /api/settings
+PATCH  /api/settings
+DELETE /api/users/me
+```
+
+---
+
+## Database Schema (PostgreSQL via Prisma)
+
+```prisma
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  plan         Plan      @default(FREE)
+  createdAt    DateTime  @default(now())
+  trackers     Tracker[]
+  settings     Settings?
+}
+
+model Tracker {
+  id          String   @id @default(uuid())
+  userId      String
+  domain      String
+  trackerName String
+  category    String   // Analytics, Advertising, Social, Fingerprinting
+  firstSeen   DateTime @default(now())
+  lastSeen    DateTime @default(now())
+  count       Int      @default(1)
+  isBlocked   Boolean  @default(false)
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Settings {
+  id             String  @id @default(uuid())
+  userId         String  @unique
+  globalBlocking Boolean @default(false)
+  emailAlerts    Boolean @default(true)
+  user           User    @relation(fields: [userId], references: [id])
+}
+
+enum Plan {
+  FREE
+  PREMIUM
+}
+```
+
+---
+
+## Browser Extension (Manifest V3)
+
+**Files:** `manifest.json`, `background.js`, `content.js`, `popup.html`
+
+**Functionality:**
+- `background.js`: Uses `declarativeNetRequest` API to block URLs matching EasyList/EasyPrivacy filter rules. On each page load, sends detected tracker data to the PrivacyGuard backend API (POST /api/trackers/scan) with the user's auth token.
+- `content.js`: Reads cookies on the current page and reports them to background script.
+- `popup.html`: Mini UI showing tracker count for current site, global block toggle, link to open full dashboard.
+
+**Auth:** Extension stores JWT in `chrome.storage.local`. User links extension from the onboarding flow.
+
+---
+
+## Privacy Score Algorithm
+
+Calculate score server-side and return from `/api/dashboard/summary`:
+
+```
+base_score = 100
+deductions:
+  - per unique tracker domain (max -30): -1 per tracker, capped
+  - global blocking OFF: -20
+  - active data breach found: -25
+  - no extension connected: -15
+bonuses:
+  - all trackers blocked: +10
+  - no breaches: already preserved
+  
+final_score = clamp(base_score + bonuses - deductions, 0, 100)
+```
+
+Score color: 0–39 = red, 40–69 = yellow, 70–100 = green.
+
+---
+
+## MVP Scope (Build First)
+
+Focus the initial build on these — everything else can be stubbed:
+
+1. ✅ Landing page (fully polished)
+2. ✅ Signup / Login
+3. ✅ Dashboard with privacy score, tracker table, breach alert
+4. ✅ Trackers page with block toggles
+5. ✅ Breaches check (HaveIBeenPwned integration or mock)
+6. ✅ Settings page (basic)
+7. ✅ Backend API (auth + trackers + dashboard summary + breach check)
+8. ✅ Database schema and seed data
+9. ✅ Browser extension (basic version — detect + report trackers)
+
+Stub for later: Reports page, PDF export, VPN integration, auto-block premium features, full notification system.
+
+---
+
+## Code Quality Standards
+
+- All React components use functional components + hooks
+- API calls use Axios with an interceptor that attaches JWT from localStorage
+- All forms have loading states and error handling
+- Backend routes have input validation (use Zod or express-validator)
+- Sensitive routes require auth middleware
+- CORS configured correctly for extension + web app origins
+- Environment variables via `.env` (never hardcode secrets)
+- Code split by feature: `/features/trackers/`, `/features/auth/`, `/features/dashboard/`
+
+---
+
+## Deliverable Structure
+
+```
+privacyguard/
+├── client/                  # React + Vite frontend
+│   ├── src/
+│   │   ├── features/
+│   │   │   ├── auth/
+│   │   │   ├── dashboard/
+│   │   │   ├── trackers/
+│   │   │   ├── breaches/
+│   │   │   └── settings/
+│   │   ├── components/      # Shared UI components
+│   │   ├── hooks/
+│   │   ├── lib/             # API client, utils
+│   │   └── App.jsx
+├── server/                  # Node.js + Express backend
+│   ├── routes/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── prisma/
+│   └── index.js
+├── extension/               # Browser extension
+│   ├── manifest.json
+│   ├── background.js
+│   ├── content.js
+│   └── popup.html
+└── README.md                # Setup instructions
+```
+
+---
+
+## Final Notes for the Agent
+
+- Start with the database schema and backend API, then build the frontend.
+- Use mock/seed data for trackers so the dashboard looks populated from day one.
+- The landing page should be **fully production-polished** — this is what converts users.
+- The dashboard is the heart of the product — make it genuinely impressive and data-rich.
+- Do not use placeholder "lorem ipsum" copy anywhere. Write real, context-appropriate content.
+- Every page must be responsive (mobile + desktop).
+- When in doubt on a feature detail, default to the simpler, shippable approach.
