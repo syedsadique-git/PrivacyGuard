@@ -26,7 +26,7 @@ echo ============================================
 echo   Done! GitHub Actions will now build and
 echo   deploy to GitHub Pages automatically.
 echo   
-echo   Site: https://syedsadique-git.github.io/PrivicyGuard/
-echo   Actions: https://github.com/syedsadique-git/PrivicyGuard/actions
+echo   Site: https://syedsadique-git.github.io/PrivacyGuard/
+echo   Actions: https://github.com/syedsadique-git/PrivacyGuard/actions
 echo ============================================
 pause

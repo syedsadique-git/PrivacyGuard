@@ -94,7 +94,7 @@ echo ================================================
 echo  SUCCESS! Deployed to GitHub Pages!
 echo.
 echo  Your site will be live in ~60 seconds at:
-echo  https://syedsadique-git.github.io/PrivicyGuard/
+echo  https://syedsadique-git.github.io/PrivacyGuard/
 echo.
 echo  Make sure GitHub Pages is set to:
 echo  Settings > Pages > Branch: gh-pages > /(root)

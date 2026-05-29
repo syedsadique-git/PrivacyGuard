@@ -10,8 +10,8 @@
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/syedsadique-git/PrivicyGuard.git
-cd PrivicyGuard/privacyguard
+git clone https://github.com/syedsadique-git/PrivacyGuard.git
+cd PrivacyGuard/privacyguard
 ```
 
 ### 2. Backend Setup
@@ -51,7 +51,7 @@ Your frontend is automatically deployed to GitHub Pages on every push to `main`.
 
 ### One-Time Setup (Do This Once)
 
-1. Go to your repo: https://github.com/syedsadique-git/PrivicyGuard
+1. Go to your repo: https://github.com/syedsadique-git/PrivacyGuard
 2. Click **Settings** → **Pages** (left sidebar)
 3. Under **Source**, select **Deploy from a branch**
 4. Set Branch to `gh-pages`, folder to `/ (root)`
@@ -62,7 +62,7 @@ Your frontend is automatically deployed to GitHub Pages on every push to `main`.
 Every time you push to `main`:
 - GitHub Actions builds the React frontend
 - Deploys it to the `gh-pages` branch automatically
-- Site is live at: **https://syedsadique-git.github.io/PrivicyGuard/**
+- Site is live at: **https://syedsadique-git.github.io/PrivacyGuard/**
 
 ### First Deploy
 
@@ -120,7 +120,7 @@ git add -A && git commit -m "chore: update API URL" && git push
 
 **Blank page on refresh (route like /dashboard)**
 - The `public/404.html` handles this — make sure it's present in the build
-- Check that `vite.config.js` has the correct `base: '/PrivicyGuard/'`
+- Check that `vite.config.js` has the correct `base: '/PrivacyGuard/'`
 
 **API calls fail on GitHub Pages**
 - Set `VITE_API_URL` in your environment or Vite config for production

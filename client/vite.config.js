@@ -3,9 +3,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  // Base path for GitHub Pages: /PrivicyGuard/
+  // Base path for GitHub Pages: /PrivacyGuard/
   // In production this makes all asset paths relative to the repo name
-  base: process.env.NODE_ENV === 'production' ? '/PrivicyGuard/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/PrivacyGuard/' : '/',
   server: {
     port: 5173,
     proxy: {
