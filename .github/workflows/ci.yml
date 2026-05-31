@@ -80,6 +80,9 @@ jobs:
       working-directory: ./privacyguard/client
       env:
         NODE_ENV: production
+        VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+        VITE_API_URL: /api
+        VITE_APP_URL: https://syedsadique-git.github.io/PrivacyGuard
       run: npm run build
 
     - name: Upload build artifact
