@@ -42,8 +42,17 @@ export default function PrivacyScoreRing({ score, size = 'large', animate = true
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative" style={{ width: outer, height: outer }}>
-        <svg width={outer} height={outer} className="transform -rotate-90">
+      <div className="relative score-ring-container" style={{ width: outer, height: outer }}>
+        {/* Pulsing glow background */}
+        <div 
+          className="absolute inset-0 rounded-full animate-pulse-ring"
+          style={{
+            background: `radial-gradient(circle, ${getColor()}20 0%, transparent 70%)`,
+            filter: 'blur(20px)'
+          }}
+        />
+        
+        <svg width={outer} height={outer} className="transform -rotate-90 relative z-10">
           {/* Background circle */}
           <circle
             cx={outer / 2}
@@ -53,7 +62,7 @@ export default function PrivacyScoreRing({ score, size = 'large', animate = true
             stroke="#1A2942"
             strokeWidth={stroke}
           />
-          {/* Progress circle */}
+          {/* Progress circle with glow */}
           <circle
             cx={outer / 2}
             cy={outer / 2}
@@ -64,17 +73,24 @@ export default function PrivacyScoreRing({ score, size = 'large', animate = true
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
-            className="transition-all duration-1000 ease-out"
+            className="transition-all duration-1000 ease-out score-ring-progress"
             style={{
-              filter: `drop-shadow(0 0 8px ${getColor()})`
+              filter: `drop-shadow(0 0 12px ${getColor()}) drop-shadow(0 0 4px ${getColor()})`
             }}
           />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className={`font-mono font-bold ${size === 'large' ? 'text-5xl' : 'text-3xl'}`} style={{ color: getColor() }}>
+        
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
+          <div 
+            className={`font-mono font-bold ${size === 'large' ? 'text-5xl' : 'text-3xl'} animate-score-count`} 
+            style={{ 
+              color: getColor(),
+              textShadow: `0 0 20px ${getColor()}80, 0 0 10px ${getColor()}40`
+            }}
+          >
             {displayScore}
           </div>
-          <div className={`text-gray-400 ${size === 'large' ? 'text-sm' : 'text-xs'} mt-1`}>
+          <div className={`text-gray-400 ${size === 'large' ? 'text-sm' : 'text-xs'} mt-1 uppercase tracking-wider`}>
             {getLabel()}
           </div>
         </div>

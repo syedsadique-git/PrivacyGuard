@@ -9,6 +9,7 @@ import Trackers from './features/trackers/Trackers';
 import Breaches from './features/breaches/Breaches';
 import Reports from './features/reports/Reports';
 import Settings from './features/settings/Settings';
+import PaymentSuccess from './features/payment/PaymentSuccess';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -37,6 +38,7 @@ function App() {
         <Route path="/breaches" element={<PrivateRoute><Breaches /></PrivateRoute>} />
         <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+        <Route path="/payment/success" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
       </Routes>
     </AuthProvider>
   );

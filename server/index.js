@@ -9,21 +9,25 @@ import breachRoutes from './routes/breaches.js';
 import dashboardRoutes from './routes/dashboard.js';
 import reportsRoutes from './routes/reports.js';
 import settingsRoutes from './routes/settings.js';
+import paymentRoutes from './routes/payment.js';
 
 dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
 
+app.locals.prisma = prisma;
+
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true
+  origin: [
+    process.env.CLIENT_URL || 'http://localhost:5173',
+    'http://localhost:5173',
+    'http://localhost:5174',
+  ],
+  credentials: true,
 }));
 app.use(express.json());
-
-// Make prisma available to all routes
-app.locals.prisma = prisma;
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -32,6 +36,7 @@ app.use('/api/breaches', breachRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -45,12 +50,10 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3001;
-
 app.listen(PORT, () => {
   console.log(`🚀 PrivacyGuard API running on port ${PORT}`);
 });
 
-// Graceful shutdown
 process.on('SIGINT', async () => {
   await prisma.$disconnect();
   process.exit(0);

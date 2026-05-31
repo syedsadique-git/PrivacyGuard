@@ -21,9 +21,11 @@
     "express": "^4.18.3",
     "google-auth-library": "^10.6.2",
     "jsonwebtoken": "^9.0.2",
+    "razorpay": "^2.9.6",
+    "stripe": "^22.2.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "prisma": "^7.8.0"
+    "prisma": "^5.11.0"
   }
 }

@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
-import { User, Bell, Shield, CreditCard, Trash2, Save, AlertCircle } from 'lucide-react';
+import { User, Bell, Shield, CreditCard, Trash2, Save, AlertCircle, Loader, CheckCircle, XCircle } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useAuth } from '../auth/AuthContext';
+import { useUpgrade } from '../payment/useUpgrade';
 import api from '../../lib/api';
 
 export default function Settings() {
   const { user } = useAuth();
+  const { startUpgrade, upgrading, error: upgradeError } = useUpgrade();
   const [activeTab, setActiveTab] = useState('profile');
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [subStatus, setSubStatus] = useState(null);
+  const [cancellingPlan, setCancellingPlan] = useState(false);
 
   // Form states
   const [email, setEmail] = useState('');
@@ -21,6 +25,35 @@ export default function Settings() {
   useEffect(() => {
     fetchSettings();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'subscription') {
+      fetchSubscriptionStatus();
+    }
+  }, [activeTab]);
+
+  const fetchSubscriptionStatus = async () => {
+    try {
+      const res = await api.get('/payment/subscription-status');
+      setSubStatus(res.data);
+    } catch (e) {
+      // not critical
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!confirm('Cancel your Premium subscription? You will keep access until the end of the billing period.')) return;
+    setCancellingPlan(true);
+    try {
+      await api.post('/payment/cancel-subscription');
+      setMessage('Subscription will be cancelled at the end of the billing period.');
+      await fetchSubscriptionStatus();
+    } catch (e) {
+      setMessage(e.response?.data?.error || 'Failed to cancel subscription.');
+    } finally {
+      setCancellingPlan(false);
+    }
+  };
 
   const fetchSettings = async () => {
     try {
@@ -317,28 +350,96 @@ export default function Settings() {
           <div className="space-y-6">
             <div className="card">
               <h2 className="text-2xl font-bold mb-6">Subscription</h2>
-              <div className="flex items-center justify-between mb-6">
+
+              {/* Current Plan */}
+              <div className="flex items-center justify-between p-4 rounded-lg bg-cyber-blue border border-gray-700 mb-6">
                 <div>
-                  <div className="text-lg font-semibold">Current Plan</div>
-                  <div className="text-3xl font-bold text-cyber-teal mt-2">{user.plan}</div>
+                  <div className="text-sm text-gray-400 mb-1">Current Plan</div>
+                  <div className={`text-2xl font-bold ${user.plan === 'PREMIUM' ? 'text-cyber-teal' : 'text-white'}`}>
+                    {user.plan === 'PREMIUM' ? '⭐ Premium' : 'Free'}
+                  </div>
+                  {subStatus?.subscription?.currentPeriodEnd && (
+                    <div className="text-xs text-gray-400 mt-1">
+                      {subStatus.subscription.cancelAtPeriodEnd
+                        ? `Cancels on ${new Date(subStatus.subscription.currentPeriodEnd).toLocaleDateString()}`
+                        : `Renews on ${new Date(subStatus.subscription.currentPeriodEnd).toLocaleDateString()}`}
+                    </div>
+                  )}
                 </div>
-                {user.plan === 'FREE' && (
-                  <button className="btn-primary">
-                    Upgrade to Premium
+                {user.plan === 'FREE' ? (
+                  <button
+                    onClick={startUpgrade}
+                    disabled={upgrading}
+                    className="btn-primary flex items-center space-x-2 disabled:opacity-60"
+                  >
+                    {upgrading && <Loader className="w-4 h-4 animate-spin" />}
+                    <span>{upgrading ? 'Redirecting…' : 'Upgrade to Premium'}</span>
                   </button>
+                ) : (
+                  <span className="flex items-center space-x-2 text-cyber-teal font-semibold">
+                    <CheckCircle className="w-5 h-5" />
+                    <span>Active</span>
+                  </span>
                 )}
               </div>
+              {upgradeError && <p className="text-cyber-red text-sm mb-4">{upgradeError}</p>}
 
-              {user.plan === 'FREE' && (
-                <div className="border-t border-gray-700 pt-6">
-                  <h3 className="font-semibold mb-4">Premium Benefits</h3>
+              {/* Feature comparison */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg border border-gray-700">
+                  <h3 className="font-semibold mb-3 text-gray-300">Free</h3>
                   <ul className="space-y-2 text-sm text-gray-400">
-                    <li>✓ Unlimited tracker detection</li>
-                    <li>✓ Monthly privacy reports with PDF export</li>
-                    <li>✓ Email breach monitoring</li>
-                    <li>✓ Priority support</li>
-                    <li>✓ Advanced analytics</li>
+                    {['Basic tracker detection', 'Limited to 50 trackers/month', 'Basic dashboard'].map((f) => (
+                      <li key={f} className="flex items-center space-x-2">
+                        <CheckCircle className="w-4 h-4 text-gray-500" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
                   </ul>
+                </div>
+                <div className="p-4 rounded-lg border border-cyber-teal bg-cyber-teal/5">
+                  <h3 className="font-semibold mb-3 text-cyber-teal">Premium — $9/month</h3>
+                  <ul className="space-y-2 text-sm text-gray-300">
+                    {[
+                      'Unlimited tracker detection',
+                      'Monthly privacy reports + PDF export',
+                      'Email breach monitoring',
+                      'Advanced analytics & insights',
+                      'Priority support',
+                    ].map((f) => (
+                      <li key={f} className="flex items-center space-x-2">
+                        <CheckCircle className="w-4 h-4 text-cyber-teal" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Cancel subscription */}
+              {user.plan === 'PREMIUM' && subStatus?.subscription && !subStatus.subscription.cancelAtPeriodEnd && (
+                <div className="border-t border-gray-700 mt-6 pt-6">
+                  <h3 className="font-semibold mb-2 text-gray-300">Manage Subscription</h3>
+                  <p className="text-sm text-gray-400 mb-4">
+                    Cancelling will keep Premium active until the end of your current billing period.
+                  </p>
+                  <button
+                    onClick={handleCancelSubscription}
+                    disabled={cancellingPlan}
+                    className="flex items-center space-x-2 text-cyber-red border border-cyber-red px-4 py-2 rounded-lg hover:bg-cyber-red/10 transition-colors disabled:opacity-60 text-sm"
+                  >
+                    {cancellingPlan ? <Loader className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                    <span>{cancellingPlan ? 'Cancelling…' : 'Cancel Subscription'}</span>
+                  </button>
+                </div>
+              )}
+              {subStatus?.subscription?.cancelAtPeriodEnd && (
+                <div className="border-t border-gray-700 mt-6 pt-6">
+                  <p className="text-sm text-amber-400">
+                    ⚠️ Your subscription is set to cancel on{' '}
+                    {new Date(subStatus.subscription.currentPeriodEnd).toLocaleDateString()}.
+                    You will retain Premium access until then.
+                  </p>
                 </div>
               )}
             </div>

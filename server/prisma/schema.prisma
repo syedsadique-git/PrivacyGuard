@@ -8,17 +8,20 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  passwordHash String?
-  googleId     String?   @unique
-  name         String?
-  avatar       String?
-  plan         Plan      @default(FREE)
-  createdAt    DateTime  @default(now())
-  trackers     Tracker[]
-  settings     Settings?
-  breaches     MonitoredEmail[]
+  id                   String    @id @default(uuid())
+  email                String    @unique
+  passwordHash         String?
+  googleId             String?   @unique
+  name                 String?
+  avatar               String?
+  plan                 Plan      @default(FREE)
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  planExpiresAt        DateTime?
+  createdAt            DateTime  @default(now())
+  trackers             Tracker[]
+  settings             Settings?
+  breaches             MonitoredEmail[]
 }
 
 model Tracker {

@@ -1,25 +1,15 @@
-import axios from 'axios';
 import jwt from 'jsonwebtoken';
 
 export const googleLogin = async (req, res) => {
   try {
-    const { credential } = req.body;
+    const { userInfo } = req.body;
     const { prisma } = req.app.locals;
 
-    if (!credential) {
-      return res.status(400).json({ error: 'Google credential is required' });
+    if (!userInfo || !userInfo.sub || !userInfo.email) {
+      return res.status(400).json({ error: 'Invalid Google user info' });
     }
 
-    // Fetch user info using the Google access token
-    const googleRes = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: { Authorization: `Bearer ${credential}` },
-    });
-
-    const { sub: googleId, email, name, picture } = googleRes.data;
-
-    if (!email) {
-      return res.status(400).json({ error: 'Google account must have an email' });
-    }
+    const { sub: googleId, email, name, picture } = userInfo;
 
     // Find or create the user
     let user = await prisma.user.findFirst({
@@ -68,7 +58,7 @@ export const googleLogin = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Google login error:', error?.response?.data || error.message);
-    res.status(401).json({ error: 'Invalid Google credential' });
+    console.error('Google login error full:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    res.status(500).json({ error: 'Google login failed', detail: error.message });
   }
 };

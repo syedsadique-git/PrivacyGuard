@@ -61,7 +61,12 @@ export default function Signup() {
     setError('');
     setGoogleLoading(true);
     try {
-      await googleLogin(tokenResponse.access_token);
+      const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+      });
+      if (!userInfoRes.ok) throw new Error('Failed to fetch Google user info');
+      const userInfo = await userInfoRes.json();
+      await googleLogin(userInfo);
       navigate('/onboarding');
     } catch (err) {
       setError(err.response?.data?.error || 'Google sign-up failed. Please try again.');

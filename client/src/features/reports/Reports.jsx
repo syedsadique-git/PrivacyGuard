@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
-import { Download, Lock, TrendingUp } from 'lucide-react';
+import { Download, Lock, TrendingUp, Loader } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useAuth } from '../auth/AuthContext';
+import { useUpgrade } from '../payment/useUpgrade';
 import api from '../../lib/api';
 
 export default function Reports() {
   const { user } = useAuth();
+  const { startUpgrade, upgrading, error: upgradeError } = useUpgrade();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const isPremium = user?.plan === 'PREMIUM';
@@ -56,9 +58,17 @@ export default function Reports() {
                   </div>
                 ))}
               </div>
-              <button className="btn-primary text-lg px-8 py-4">
-                Upgrade to Premium - $9/month
+              <button
+                onClick={startUpgrade}
+                disabled={upgrading}
+                className="btn-primary text-lg px-8 py-4 flex items-center space-x-2 mx-auto disabled:opacity-60"
+              >
+                {upgrading && <Loader className="w-5 h-5 animate-spin" />}
+                <span>{upgrading ? 'Redirecting to checkout…' : 'Upgrade to Premium — $9/month'}</span>
               </button>
+              {upgradeError && (
+                <p className="text-cyber-red text-sm mt-3">{upgradeError}</p>
+              )}
             </div>
           </div>
         </div>

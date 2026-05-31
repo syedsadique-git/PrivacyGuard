@@ -7,7 +7,10 @@ export default defineConfig({
   // In production this makes all asset paths relative to the repo name
   base: process.env.NODE_ENV === 'production' ? '/PrivacyGuard/' : '/',
   server: {
-    port: 5173,
+    port: 5174,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3001',

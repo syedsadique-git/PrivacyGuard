@@ -41,14 +41,14 @@ export default function Login() {
     setError('');
     setGoogleLoading(true);
     try {
-      // Exchange access token for user info, then send credential to backend
+      // Fetch user info from Google using the access token
       const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
         headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
       });
+      if (!userInfoRes.ok) throw new Error('Failed to fetch Google user info');
       const userInfo = await userInfoRes.json();
-      // Use the sub (Google user ID) as credential identifier via ID token flow
-      // We'll use the access token approach: send to our backend
-      await googleLogin(tokenResponse.access_token);
+      // Send the user info directly to our backend
+      await googleLogin(userInfo);
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Google login failed. Please try again.');

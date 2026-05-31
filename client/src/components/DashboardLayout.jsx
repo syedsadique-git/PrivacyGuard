@@ -2,6 +2,15 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Shield, LayoutDashboard, Eye, AlertTriangle, FileText, Settings, LogOut, Bell, Menu, X } from 'lucide-react';
 import { useAuth } from '../features/auth/AuthContext';
+import RobotBackground from './RobotBackground';
+
+// Map routes to robot variants
+function getRobotVariant(pathname) {
+  if (pathname === '/dashboard') return 'smile';
+  if (pathname === '/trackers')  return 'salute';
+  if (pathname.startsWith('/payment')) return 'heart';
+  return null; // no robot on other pages
+}
 
 export default function DashboardLayout({ children }) {
   const location = useLocation();
@@ -76,8 +85,12 @@ export default function DashboardLayout({ children }) {
     </>
   );
 
+  const robotVariant = getRobotVariant(location.pathname);
+
   return (
     <div className="min-h-screen flex bg-cyber-dark">
+      {/* Robot background — fixed behind everything */}
+      {robotVariant && <RobotBackground variant={robotVariant} />}
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 bg-cyber-darker border-r border-gray-800 flex-col flex-shrink-0">
         <SidebarContent />

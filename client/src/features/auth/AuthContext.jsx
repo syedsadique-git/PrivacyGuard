@@ -36,6 +36,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Exposed so components like PaymentSuccess can force a user refresh
+  const refreshUser = async () => {
+    const response = await api.get('/auth/me');
+    setUser(response.data.user);
+    return response.data.user;
+  };
+
   const login = async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
     localStorage.setItem('token', response.data.token);
@@ -43,8 +50,8 @@ export const AuthProvider = ({ children }) => {
     return response.data;
   };
 
-  const googleLogin = async (credential) => {
-    const response = await api.post('/auth/google', { credential });
+  const googleLogin = async (userInfo) => {
+    const response = await api.post('/auth/google', { userInfo });
     localStorage.setItem('token', response.data.token);
     setUser(response.data.user);
     return response.data;
@@ -64,7 +71,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, googleLogin, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, googleLogin, signup, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
