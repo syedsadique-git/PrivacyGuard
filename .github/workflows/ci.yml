@@ -32,6 +32,7 @@ jobs:
         VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
         VITE_API_URL: https://privacyguard-production-b36e.up.railway.app/api
         VITE_APP_URL: https://syedsadique-git.github.io/PrivacyGuard
+        VITE_RAZORPAY_KEY_ID: ${{ secrets.VITE_RAZORPAY_KEY_ID }}
       run: npm run build
 
     - name: Upload build artifact
