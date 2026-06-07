@@ -23,7 +23,10 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'https://syedsadique-git.github.io',
+  // Add your Render backend URL too (for same-origin requests)
+  'https://privacyguard-api.onrender.com',
 ];
+// Also allow whatever CLIENT_URL is set to in the env (Railway, Render, etc.)
 if (process.env.CLIENT_URL) allowedOrigins.push(process.env.CLIENT_URL);
 
 app.use(cors({
