@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
-import { Download, Lock, TrendingUp, Loader } from 'lucide-react';
+import { Download, Lock, TrendingUp } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useAuth } from '../auth/AuthContext';
 import { useUpgrade } from '../payment/useUpgrade';
+import PaymentComingSoonModal from '../payment/PaymentComingSoonModal';
 import api from '../../lib/api';
 
 export default function Reports() {
   const { user } = useAuth();
-  const { startUpgrade, upgrading, error: upgradeError } = useUpgrade();
+  const { startUpgrade, showModal, closeModal } = useUpgrade();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const isPremium = user?.plan === 'PREMIUM';
@@ -35,6 +36,7 @@ export default function Reports() {
   if (!isPremium) {
     return (
       <DashboardLayout>
+        {showModal && <PaymentComingSoonModal onClose={closeModal} />}
         <div className="max-w-4xl mx-auto">
           <div className="card text-center py-16 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-cyber-teal/5 to-transparent" />
@@ -45,30 +47,16 @@ export default function Reports() {
                 Monthly privacy reports with detailed analytics and PDF export are available with Premium.
               </p>
               <div className="space-y-4 max-w-sm mx-auto mb-8">
-                {[
-                  'Tracker trends over time',
-                  'Category breakdown analysis',
-                  'Privacy score history',
-                  'Export reports as PDF',
-                  'Advanced insights'
-                ].map((feature, i) => (
+                {['Tracker trends over time','Category breakdown analysis','Privacy score history','Export reports as PDF','Advanced insights'].map((feature, i) => (
                   <div key={i} className="flex items-center space-x-3 text-left">
                     <div className="w-2 h-2 bg-cyber-teal rounded-full" />
                     <span className="text-gray-300">{feature}</span>
                   </div>
                 ))}
               </div>
-              <button
-                onClick={startUpgrade}
-                disabled={upgrading}
-                className="btn-primary text-lg px-8 py-4 flex items-center space-x-2 mx-auto disabled:opacity-60"
-              >
-                {upgrading && <Loader className="w-5 h-5 animate-spin" />}
-                <span>{upgrading ? 'Redirecting to checkout…' : 'Upgrade to Premium — $9/month'}</span>
+              <button onClick={startUpgrade} className="btn-primary text-lg px-8 py-4 mx-auto">
+                Upgrade to Premium — $9/month
               </button>
-              {upgradeError && (
-                <p className="text-cyber-red text-sm mt-3">{upgradeError}</p>
-              )}
             </div>
           </div>
         </div>

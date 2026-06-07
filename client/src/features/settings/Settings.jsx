@@ -3,11 +3,12 @@ import { User, Bell, Shield, CreditCard, Trash2, Save, AlertCircle, Loader, Chec
 import DashboardLayout from '../../components/DashboardLayout';
 import { useAuth } from '../auth/AuthContext';
 import { useUpgrade } from '../payment/useUpgrade';
+import PaymentComingSoonModal from '../payment/PaymentComingSoonModal';
 import api from '../../lib/api';
 
 export default function Settings() {
   const { user } = useAuth();
-  const { startUpgrade, upgrading, error: upgradeError } = useUpgrade();
+  const { startUpgrade, showModal, closeModal } = useUpgrade();
   const [activeTab, setActiveTab] = useState('profile');
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -164,6 +165,7 @@ export default function Settings() {
 
   return (
     <DashboardLayout>
+      {showModal && <PaymentComingSoonModal onClose={closeModal} />}
       <div className="max-w-4xl mx-auto">
         {/* Tabs */}
         <div className="flex space-x-1 mb-6 border-b border-gray-800">
@@ -369,11 +371,9 @@ export default function Settings() {
                 {user.plan === 'FREE' ? (
                   <button
                     onClick={startUpgrade}
-                    disabled={upgrading}
-                    className="btn-primary flex items-center space-x-2 disabled:opacity-60"
+                    className="btn-primary flex items-center space-x-2"
                   >
-                    {upgrading && <Loader className="w-4 h-4 animate-spin" />}
-                    <span>{upgrading ? 'Redirecting…' : 'Upgrade to Premium'}</span>
+                    <span>Upgrade to Premium</span>
                   </button>
                 ) : (
                   <span className="flex items-center space-x-2 text-cyber-teal font-semibold">
@@ -382,8 +382,6 @@ export default function Settings() {
                   </span>
                 )}
               </div>
-              {upgradeError && <p className="text-cyber-red text-sm mb-4">{upgradeError}</p>}
-
               {/* Feature comparison */}
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg border border-gray-700">
