@@ -282,8 +282,8 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Privacy Score Ring — transparent background, no box */}
+        <div className="grid lg:grid-cols-3 gap-6 items-start">
+          {/* Privacy Score Ring — no background at all */}
           <div className="score-ring-section flex flex-col items-center justify-center py-8">
             <h3 className="text-lg font-semibold mb-6">Your Privacy Score</h3>
             <PrivacyScoreRing score={data.privacyScore} size="large" />
