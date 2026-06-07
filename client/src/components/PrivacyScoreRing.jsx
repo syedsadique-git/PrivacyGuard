@@ -48,12 +48,18 @@ export default function PrivacyScoreRing({ score, size = 'large', animate = true
     <div className="flex flex-col items-center">
       <div className="relative" style={{ width: outer, height: outer }}>
 
-        {/* Soft ambient glow behind the ring — no box */}
+        {/* Circular ambient glow — perfectly round, no box shape */}
         <div
-          className="absolute inset-0 rounded-full pointer-events-none"
+          className="absolute pointer-events-none rounded-full"
           style={{
-            background: `radial-gradient(circle at 50% 50%, ${color}22 0%, transparent 68%)`,
-            filter: 'blur(18px)',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: outer * 1.1,
+            height: outer * 1.1,
+            borderRadius: '50%',
+            background: `radial-gradient(circle at 50% 50%, ${color}18 0%, transparent 65%)`,
+            filter: 'blur(16px)',
           }}
         />
 
