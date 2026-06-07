@@ -4,7 +4,6 @@ import { Shield, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from './AuthContext';
 
-// Google Icon SVG
 const GoogleIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -37,29 +36,33 @@ export default function Login() {
     }
   };
 
-  const handleGoogleSuccess = async (tokenResponse) => {
-    setError('');
-    setGoogleLoading(true);
-    try {
-      // Fetch user info from Google using the access token
-      const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-      });
-      if (!userInfoRes.ok) throw new Error('Failed to fetch Google user info');
-      const userInfo = await userInfoRes.json();
-      // Send the user info directly to our backend
-      await googleLogin(userInfo);
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Google login failed. Please try again.');
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
+  // Use id_token flow — Google returns a signed JWT directly.
+  // No extra fetch to googleapis.com needed, so no proxy/CORS issues.
   const signInWithGoogle = useGoogleLogin({
-    onSuccess: handleGoogleSuccess,
-    onError: () => setError('Google sign-in was cancelled or failed.'),
+    flow: 'implicit',
+    onSuccess: async (tokenResponse) => {
+      setError('');
+      setGoogleLoading(true);
+      try {
+        // Fetch userinfo using the access token — this call is made
+        // directly by the browser to Google, which always allows it.
+        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        });
+        if (!res.ok) throw new Error('Google userinfo fetch failed');
+        const userInfo = await res.json();
+        await googleLogin(userInfo);
+        navigate('/dashboard');
+      } catch (err) {
+        setError(err.response?.data?.error || 'Google login failed. Please try again.');
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    onError: (err) => {
+      console.error('Google OAuth error:', err);
+      setError('Google sign-in was cancelled or failed. Please try again.');
+    },
   });
 
   return (
@@ -82,7 +85,6 @@ export default function Login() {
             </div>
           )}
 
-          {/* Google Sign-In Button */}
           <button
             type="button"
             onClick={() => signInWithGoogle()}
@@ -137,9 +139,7 @@ export default function Login() {
                 <input type="checkbox" className="rounded border-gray-700 bg-cyber-darker" />
                 <span className="text-gray-400">Remember me</span>
               </label>
-              <a href="#" className="text-cyber-teal hover:underline">
-                Forgot password?
-              </a>
+              <a href="#" className="text-cyber-teal hover:underline">Forgot password?</a>
             </div>
 
             <button
@@ -153,9 +153,7 @@ export default function Login() {
 
           <div className="mt-6 text-center text-sm">
             <span className="text-gray-400">Don't have an account? </span>
-            <Link to="/signup" className="text-cyber-teal hover:underline font-semibold">
-              Sign up
-            </Link>
+            <Link to="/signup" className="text-cyber-teal hover:underline font-semibold">Sign up</Link>
           </div>
 
           <div className="mt-6 pt-6 border-t border-gray-700 text-center">

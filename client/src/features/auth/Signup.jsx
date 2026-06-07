@@ -4,7 +4,6 @@ import { Shield, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from './AuthContext';
 
-// Google Icon SVG
 const GoogleIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -34,19 +33,9 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
-
+    if (password !== confirmPassword) { setError('Passwords do not match'); return; }
+    if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
     setLoading(true);
-
     try {
       await signup(email, password, confirmPassword);
       navigate('/onboarding');
@@ -57,27 +46,30 @@ export default function Signup() {
     }
   };
 
-  const handleGoogleSuccess = async (tokenResponse) => {
-    setError('');
-    setGoogleLoading(true);
-    try {
-      const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-      });
-      if (!userInfoRes.ok) throw new Error('Failed to fetch Google user info');
-      const userInfo = await userInfoRes.json();
-      await googleLogin(userInfo);
-      navigate('/onboarding');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Google sign-up failed. Please try again.');
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
+  // Same implicit flow — no extra googleapis.com fetch from a proxy
   const signUpWithGoogle = useGoogleLogin({
-    onSuccess: handleGoogleSuccess,
-    onError: () => setError('Google sign-in was cancelled or failed.'),
+    flow: 'implicit',
+    onSuccess: async (tokenResponse) => {
+      setError('');
+      setGoogleLoading(true);
+      try {
+        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        });
+        if (!res.ok) throw new Error('Google userinfo fetch failed');
+        const userInfo = await res.json();
+        await googleLogin(userInfo);
+        navigate('/onboarding');
+      } catch (err) {
+        setError(err.response?.data?.error || 'Google sign-up failed. Please try again.');
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    onError: (err) => {
+      console.error('Google OAuth error:', err);
+      setError('Google sign-in was cancelled or failed. Please try again.');
+    },
   });
 
   const strength = passwordStrength();
@@ -102,7 +94,6 @@ export default function Signup() {
             </div>
           )}
 
-          {/* Google Sign-Up Button */}
           <button
             type="button"
             onClick={() => signUpWithGoogle()}
@@ -126,14 +117,8 @@ export default function Signup() {
               <label className="block text-sm font-medium mb-2">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="input-field w-full pl-10"
-                  placeholder="you@example.com"
-                  required
-                />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  className="input-field w-full pl-10" placeholder="you@example.com" required />
               </div>
             </div>
 
@@ -141,25 +126,16 @@ export default function Signup() {
               <label className="block text-sm font-medium mb-2">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="input-field w-full pl-10"
-                  placeholder="••••••••"
-                  required
-                />
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                  className="input-field w-full pl-10" placeholder="••••••••" required />
               </div>
               {strength && (
                 <div className="mt-2 flex items-center space-x-2">
                   <div className="flex-1 h-1 bg-gray-700 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full transition-all ${
-                        strength.label === 'Weak' ? 'bg-cyber-red w-1/3' :
-                        strength.label === 'Fair' ? 'bg-yellow-500 w-2/3' :
-                        'bg-cyber-green w-full'
-                      }`}
-                    />
+                    <div className={`h-full transition-all ${
+                      strength.label === 'Weak' ? 'bg-cyber-red w-1/3' :
+                      strength.label === 'Fair' ? 'bg-yellow-500 w-2/3' : 'bg-cyber-green w-full'
+                    }`} />
                   </div>
                   <span className={`text-xs ${strength.color}`}>{strength.label}</span>
                 </div>
@@ -170,34 +146,23 @@ export default function Signup() {
               <label className="block text-sm font-medium mb-2">Confirm Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="input-field w-full pl-10"
-                  placeholder="••••••••"
-                  required
-                />
+                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="input-field w-full pl-10" placeholder="••••••••" required />
                 {confirmPassword && password === confirmPassword && (
                   <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-cyber-green" />
                 )}
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading || googleLoading}
-              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button type="submit" disabled={loading || googleLoading}
+              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
 
           <div className="mt-6 text-center text-sm">
             <span className="text-gray-400">Already have an account? </span>
-            <Link to="/login" className="text-cyber-teal hover:underline font-semibold">
-              Sign in
-            </Link>
+            <Link to="/login" className="text-cyber-teal hover:underline font-semibold">Sign in</Link>
           </div>
         </div>
       </div>
