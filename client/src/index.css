@@ -765,8 +765,11 @@
 }
 
 /* Score Ring Animations */
-.score-ring-container {
-  @apply relative;
+.score-ring-section {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
 }
 
 @keyframes pulse-ring {
