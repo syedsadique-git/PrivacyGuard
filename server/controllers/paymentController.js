@@ -1,17 +1,25 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
-
-const PREMIUM_AMOUNT = 74900; // ₹749/month in paise (100 paise = ₹1)
+const PREMIUM_AMOUNT = 74900; // ₹749/month in paise
 const CURRENCY = 'INR';
+
+// Lazy getter — only instantiates when actually called, so missing env vars
+// don't crash the server at startup.
+function getRazorpay() {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error('Razorpay keys not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET env vars.');
+  }
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+}
 
 // Step 1: Create a Razorpay Order
 export const createOrder = async (req, res) => {
   try {
+    const razorpay = getRazorpay();
     const { prisma } = req.app.locals;
     const user = await prisma.user.findUnique({ where: { id: req.userId } });
 
@@ -43,6 +51,7 @@ export const createOrder = async (req, res) => {
 // Step 2: Verify payment signature after Razorpay checkout completes
 export const verifyPayment = async (req, res) => {
   try {
+    const razorpay = getRazorpay();
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
     const { prisma } = req.app.locals;
 
@@ -50,7 +59,6 @@ export const verifyPayment = async (req, res) => {
       return res.status(400).json({ error: 'Missing payment details' });
     }
 
-    // Verify HMAC signature — this is the security check
     const body = razorpay_order_id + '|' + razorpay_payment_id;
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -61,11 +69,9 @@ export const verifyPayment = async (req, res) => {
       return res.status(400).json({ error: 'Invalid payment signature' });
     }
 
-    // Fetch payment details to get userId from notes
     const payment = await razorpay.payments.fetch(razorpay_payment_id);
     const userId = payment.notes?.userId || req.userId;
 
-    // Upgrade user to PREMIUM
     const planExpiresAt = new Date();
     planExpiresAt.setMonth(planExpiresAt.getMonth() + 1);
 
@@ -73,7 +79,7 @@ export const verifyPayment = async (req, res) => {
       where: { id: userId },
       data: {
         plan: 'PREMIUM',
-        stripeSubscriptionId: razorpay_payment_id, // reuse field to store payment ref
+        stripeSubscriptionId: razorpay_payment_id,
         planExpiresAt,
       },
     });
@@ -92,17 +98,13 @@ export const getSubscriptionStatus = async (req, res) => {
     const { prisma } = req.app.locals;
     const user = await prisma.user.findUnique({ where: { id: req.userId } });
     if (!user) return res.status(404).json({ error: 'User not found' });
-
-    res.json({
-      plan: user.plan,
-      planExpiresAt: user.planExpiresAt,
-    });
+    res.json({ plan: user.plan, planExpiresAt: user.planExpiresAt });
   } catch (error) {
     res.status(500).json({ error: 'Failed to get subscription status' });
   }
 };
 
-// Manual downgrade (for expired plans — can be run via cron)
+// Cancel / downgrade
 export const cancelSubscription = async (req, res) => {
   try {
     const { prisma } = req.app.locals;
