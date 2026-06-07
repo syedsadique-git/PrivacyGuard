@@ -289,17 +289,9 @@
   }
 }
 
-/* Score Ring Glow */
+/* Score Ring Glow — removed box, glow is now handled inside PrivacyScoreRing component */
 .score-ring-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 120%;
-  height: 120%;
-  background: radial-gradient(circle, rgba(0, 229, 204, 0.2) 0%, transparent 70%);
-  animation: pulse-glow 3s ease-in-out infinite;
-  pointer-events: none;
+  display: none;
 }
 
 /* Threat Feed Glow */

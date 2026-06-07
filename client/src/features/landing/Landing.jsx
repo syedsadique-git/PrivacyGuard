@@ -158,8 +158,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="flex justify-center animate-fade-in-scale">
-            <div className="relative">
-              <div className="score-ring-glow"></div>
+            <div className="relative flex items-center justify-center">
               <PrivacyScoreRing score={score} size="large" />
             </div>
           </div>
