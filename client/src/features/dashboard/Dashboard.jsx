@@ -284,7 +284,7 @@ export default function Dashboard() {
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Privacy Score Ring */}
-          <div className="card-hover-enhanced flex flex-col items-center justify-center py-8">
+          <div className="flex flex-col items-center justify-center py-8">
             <h3 className="text-lg font-semibold mb-6">Your Privacy Score</h3>
             <PrivacyScoreRing score={data.privacyScore} size="large" />
             <p className="text-sm text-gray-400 mt-6 text-center max-w-xs">

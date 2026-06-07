@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 export default function PrivacyScoreRing({ score, size = 'large', animate = true }) {
   const [displayScore, setDisplayScore] = useState(0);
-  
+
   useEffect(() => {
     if (animate) {
       let current = 0;
@@ -34,26 +34,36 @@ export default function PrivacyScoreRing({ score, size = 'large', animate = true
     return 'Protected';
   };
 
-  const dimensions = size === 'large' ? { outer: 200, inner: 160, stroke: 20 } : { outer: 120, inner: 96, stroke: 12 };
-  const { outer, inner, stroke } = dimensions;
+  const dimensions = size === 'large'
+    ? { outer: 200, stroke: 18 }
+    : { outer: 120, stroke: 12 };
+
+  const { outer, stroke } = dimensions;
   const radius = (outer - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (displayScore / 100) * circumference;
+  const color = getColor();
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative score-ring-container" style={{ width: outer, height: outer }}>
-        {/* Pulsing glow background */}
-        <div 
-          className="absolute inset-0 rounded-full animate-pulse-ring"
+      <div className="relative" style={{ width: outer, height: outer }}>
+
+        {/* Soft ambient glow behind the ring — no box */}
+        <div
+          className="absolute inset-0 rounded-full pointer-events-none"
           style={{
-            background: `radial-gradient(circle, ${getColor()}20 0%, transparent 70%)`,
-            filter: 'blur(20px)'
+            background: `radial-gradient(circle at 50% 50%, ${color}22 0%, transparent 68%)`,
+            filter: 'blur(18px)',
           }}
         />
-        
-        <svg width={outer} height={outer} className="transform -rotate-90 relative z-10">
-          {/* Background circle */}
+
+        <svg
+          width={outer}
+          height={outer}
+          className="transform -rotate-90"
+          style={{ position: 'relative', zIndex: 1 }}
+        >
+          {/* Track */}
           <circle
             cx={outer / 2}
             cy={outer / 2}
@@ -62,37 +72,44 @@ export default function PrivacyScoreRing({ score, size = 'large', animate = true
             stroke="#1A2942"
             strokeWidth={stroke}
           />
-          {/* Progress circle with glow */}
+          {/* Progress */}
           <circle
             cx={outer / 2}
             cy={outer / 2}
             r={radius}
             fill="none"
-            stroke={getColor()}
+            stroke={color}
             strokeWidth={stroke}
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
-            className="transition-all duration-1000 ease-out score-ring-progress"
+            className="transition-all duration-1000 ease-out"
             style={{
-              filter: `drop-shadow(0 0 12px ${getColor()}) drop-shadow(0 0 4px ${getColor()})`
+              filter: `drop-shadow(0 0 10px ${color}) drop-shadow(0 0 4px ${color})`,
             }}
           />
         </svg>
-        
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-          <div 
-            className={`font-mono font-bold ${size === 'large' ? 'text-5xl' : 'text-3xl'} animate-score-count`} 
-            style={{ 
-              color: getColor(),
-              textShadow: `0 0 20px ${getColor()}80, 0 0 10px ${getColor()}40`
+
+        {/* Centre text */}
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center"
+          style={{ zIndex: 2 }}
+        >
+          <span
+            className={`font-mono font-bold ${size === 'large' ? 'text-5xl' : 'text-3xl'}`}
+            style={{
+              color,
+              textShadow: `0 0 20px ${color}80, 0 0 8px ${color}40`,
             }}
           >
             {displayScore}
-          </div>
-          <div className={`text-gray-400 ${size === 'large' ? 'text-sm' : 'text-xs'} mt-1 uppercase tracking-wider`}>
+          </span>
+          <span
+            className={`uppercase tracking-wider ${size === 'large' ? 'text-sm' : 'text-xs'} mt-1`}
+            style={{ color: `${color}99` }}
+          >
             {getLabel()}
-          </div>
+          </span>
         </div>
       </div>
     </div>
