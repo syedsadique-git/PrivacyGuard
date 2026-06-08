@@ -158,7 +158,14 @@ export default function Landing() {
             </div>
           </div>
           <div className="flex justify-center animate-fade-in-scale">
-            <div className="relative flex items-center justify-center">
+            <div style={{
+              background: 'transparent',
+              border: 'none',
+              boxShadow: 'none',
+              backdropFilter: 'none',
+              WebkitBackdropFilter: 'none',
+              borderRadius: 0,
+            }}>
               <PrivacyScoreRing score={score} size="large" />
             </div>
           </div>
