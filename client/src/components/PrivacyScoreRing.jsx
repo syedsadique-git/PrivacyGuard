@@ -67,7 +67,7 @@ export default function PrivacyScoreRing({ score, size = 'large', animate = true
           width={outer}
           height={outer}
           className="transform -rotate-90"
-          style={{ position: 'relative', zIndex: 1 }}
+          style={{ position: 'relative', zIndex: 1, background: 'transparent', overflow: 'visible', display: 'block' }}
         >
           {/* Track */}
           <circle
